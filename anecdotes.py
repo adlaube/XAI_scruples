@@ -1,6 +1,7 @@
 import requests
 import json
 from lime.lime_text import LimeTextExplainer
+from lime import submodular_pick
 from scipy import stats
 import os
 import numpy as np
@@ -9,8 +10,6 @@ from scruples.dataset.readers import ScruplesCorpusDataset
 
 def predictor(texts):
 
-        #response = requests.post('http://127.0.0.1:5050/api/corpus/predict',json=instances)
-        
         instances=[]
         for text in texts:
                 instance = {
@@ -19,8 +18,9 @@ def predictor(texts):
                 }
                 instances.append(instance)
         
-        response = requests.post('https://norms.apps.allenai.org/api/corpus/predict',json=instances)
-        response_json = json.loads(response.text)
+        #response = requests.post('https://norms.apps.allenai.org/api/corpus/predict',json=instances)
+        response = requests.post('http://127.0.0.1:5050/api/corpus/predict',json=instances)
+        response_json = json.loads(response.text) #will throw exception if num of samples is too high
         #calc probabilities by dividing by sum of alphas
         probabilties = [[
                         x['AUTHOR']/sum(x.values()),
@@ -30,7 +30,7 @@ def predictor(texts):
                         x['INFO']/sum(x.values())]
                         for x in response_json
                         ]
-        return np.reshape(np.asarray(probabilties),(5,-1))
+        return np.reshape(np.asarray(probabilties),(-1,5))
 
 
 data = []
@@ -39,16 +39,22 @@ with open(data_dir + 'test.scruples-corpus.jsonl', 'r') as datafile:
     for ln in datafile:
         row = json.loads(ln)
         data.append(row)
+
 instance_idx = 0
 keys = ['title', 'text']
-instances = [{x:data[instance_idx][x] for x in keys}]
+test_instance = [{x:data[instance_idx][x] for x in keys}]
+test_features = test_instance[0]['title'] + test_instance[0]['text']
 
+dataset_features = [x['title'] + x['text'] for x in data]
 
-features = instances[0]['title'] + instances[0]['text']
 class_labels = ["AUTHOR", "OTHER", "EVERYBODY", "NOBODY", "INFO"]
 explainer = LimeTextExplainer(class_names=class_labels)
-exp = explainer.explain_instance(features,predictor,num_features=6, labels=[0, 1],num_samples=5) #LIME only wants one string...
-exp.as_list()
+#exp = explainer.explain_instance(test_features,predictor,num_features=2,num_samples=10,top_labels=5) #LIME only wants one string...
+#exp.save_to_file('lime.html')
+sp_obj = submodular_pick.SubmodularPick(explainer, dataset_features, predictor, sample_size=2, num_features=2,num_exps_desired=2)
 print('done')
+
+
+
 
 
