@@ -5,6 +5,7 @@ from lime import submodular_pick
 from scipy import stats
 import os
 import numpy as np
+import pickle
 
 from scruples.dataset.readers import ScruplesCorpusDataset
 
@@ -51,8 +52,12 @@ class_labels = ["AUTHOR", "OTHER", "EVERYBODY", "NOBODY", "INFO"]
 explainer = LimeTextExplainer(class_names=class_labels)
 #exp = explainer.explain_instance(test_features,predictor,num_features=2,num_samples=10,top_labels=5) #LIME only wants one string...
 #exp.save_to_file('lime.html')
-sp_obj = submodular_pick.SubmodularPick(explainer, dataset_features, predictor, sample_size=2, num_features=2,num_exps_desired=2)
-print('done')
+sp_obj = submodular_pick.SubmodularPick(explainer, dataset_features, predictor, sample_size=100, num_features=5,num_exps_desired=10)
+
+filehandler = open("SP.obj","wb")
+pickle.dump(sp_obj,filehandler)
+filehandler.close()
+print('done and written')
 
 
 
