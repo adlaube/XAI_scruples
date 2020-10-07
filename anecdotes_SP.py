@@ -6,6 +6,7 @@ from scipy import stats
 import os
 import numpy as np
 import pickle
+import time
 
 from scruples.dataset.readers import ScruplesCorpusDataset
 
@@ -52,12 +53,15 @@ class_labels = ["AUTHOR", "OTHER", "EVERYBODY", "NOBODY", "INFO"]
 explainer = LimeTextExplainer(class_names=class_labels)
 #exp = explainer.explain_instance(test_features,predictor,num_features=2,num_samples=10,top_labels=5) #LIME only wants one string...
 #exp.save_to_file('lime.html')
-sp_obj = submodular_pick.SubmodularPick(explainer, dataset_features, predictor, sample_size=100, num_features=5,num_exps_desired=10)
 
+#Problem: 5000 perturbations per sample, API muss umgangen werden um das umzustellen
+start = time.time()
+sp_obj = submodular_pick.SubmodularPick(explainer, dataset_features, predictor, sample_size=1, num_features=5,num_exps_desired=10)
+end = time.time()
 filehandler = open("SP.obj","wb")
 pickle.dump(sp_obj,filehandler)
 filehandler.close()
-print('done and written')
+print('done and written, execution time: %f',end-start)
 
 
 
