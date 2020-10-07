@@ -1,3 +1,3 @@
-rm anec.log
+rm log/anec.log
 killall anecdotes
-setsid anecdotes_SP.py > anec.log &
+setsid python anecdotes_SP.py > log/anec.log &

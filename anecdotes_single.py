@@ -55,7 +55,7 @@ explainer = LimeTextExplainer(class_names=class_labels)
 start = time.time()
 exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=5000,top_labels=5) #LIME only wants one string...
 end = time.time()
-exp.save_to_file('lime.html')
+exp.save_to_file('exp/anecdotes/lime.html')
 filehandler = open("exp.obj","wb")
 pickle.dump(exp,filehandler)
 filehandler.close()
