@@ -58,6 +58,9 @@ explainer = LimeTextExplainer(class_names=class_labels)
 start = time.time()
 sp_obj = submodular_pick.SubmodularPick(explainer, dataset_features, predictor, sample_size=1, num_features=5,num_exps_desired=10)
 end = time.time()
+for idx,exp_item in enumerate(sp_obj.explanations):
+        exp_item.save_to_file("exp/anecdotes/ANEC_" + str(idx) + ".html")
+sp_obj.sp_explanations
 filehandler = open("SP.obj","wb")
 pickle.dump(sp_obj,filehandler)
 filehandler.close()
