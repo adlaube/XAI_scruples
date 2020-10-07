@@ -61,7 +61,7 @@ end = time.time()
 filehandler = open("SP.obj","wb")
 pickle.dump(sp_obj,filehandler)
 filehandler.close()
-print('done and written, execution time: %f',end-start)
+print('execution time: ',end-start)
 
 
 

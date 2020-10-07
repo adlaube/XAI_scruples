@@ -53,13 +53,13 @@ dataset_features = [x['title'] + x['text'] for x in data]
 class_labels = ["AUTHOR", "OTHER", "EVERYBODY", "NOBODY", "INFO"]
 explainer = LimeTextExplainer(class_names=class_labels)
 start = time.time()
-exp = explainer.explain_instance(test_features,predictor,num_features=2,num_samples=10,top_labels=5) #LIME only wants one string...
+exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=5000,top_labels=5) #LIME only wants one string...
 end = time.time()
 exp.save_to_file('lime.html')
 filehandler = open("exp.obj","wb")
 pickle.dump(exp,filehandler)
 filehandler.close()
-print('done and written, execution time: %f',end-start)
+print('execution time: %f',end-start)
 
 
 
