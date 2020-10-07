@@ -1,7 +1,0 @@
-export SCRUPLES_NORMS_ACTIONS_BASELINE=roberta
-export SCRUPLES_NORMS_ACTIONS_MODEL='/Users/adrianlauber/XAI_scruples/models/dilemmas'
-export SCRUPLES_NORMS_CORPUS_BASELINE=roberta
-export SCRUPLES_NORMS_CORPUS_MODEL='/Users/adrianlauber/XAI_scruples/models/anecdotes'
-export SCRUPLES_NORMS_PREDICT_BATCH_SIZE=20
-export SCRUPLES_NORMS_GPU_IDS=''
-scruples demo norms
