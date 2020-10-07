@@ -60,7 +60,6 @@ sp_obj = submodular_pick.SubmodularPick(explainer, dataset_features, predictor, 
 end = time.time()
 for idx,exp_item in enumerate(sp_obj.explanations):
         exp_item.save_to_file("exp/anecdotes/ANEC_" + str(idx) + ".html")
-sp_obj.sp_explanations
 filehandler = open("exp/anecdotes/SP.obj","wb")
 pickle.dump(sp_obj,filehandler)
 filehandler.close()
