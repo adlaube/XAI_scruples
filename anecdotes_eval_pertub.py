@@ -52,26 +52,26 @@ dataset_features = [x['title'] + x['text'] for x in data]
 keys = ['title', 'text']
 
 
-instance_idx = 0
+instance_idx = 20
 test_instance = [{x:data[instance_idx][x] for x in keys}]
-test_features = test_instance[0]['title'] + test_instance[0]['text']
+test_features = test_instance[instance_idx]['title'] + test_instance[instance_idx]['text']
 
 exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=100,top_labels=3) #LIME only wants one string...
-exp.save_to_file('exp/anecdotes/test_lime_0_100.html')
+exp.save_to_file('exp/anecdotes/test_lime_20_100.html')
 
 exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=500,top_labels=3) #LIME only wants one string...
-exp.save_to_file('exp/anecdotes/test_lime_0_500.html')
+exp.save_to_file('exp/anecdotes/test_lime_20_500.html')
 
 exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=1000,top_labels=3) #LIME only wants one string...
-exp.save_to_file('exp/anecdotes/test_lime_0_1000.html')
+exp.save_to_file('exp/anecdotes/test_lime_20_1000.html')
 
 exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=3000,top_labels=3) #LIME only wants one string...
-exp.save_to_file('exp/anecdotes/test_lime_0_3000.html')
+exp.save_to_file('exp/anecdotes/test_lime_20_3000.html')
 
 
 instance_idx = 10
 test_instance = [{x:data[instance_idx][x] for x in keys}]
-test_features = test_instance[0]['title'] + test_instance[0]['text']
+test_features = test_instance[instance_idx]['title'] + test_instance[instance_idx]['text']
 
 exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=100,top_labels=3) #LIME only wants one string...
 exp.save_to_file('exp/anecdotes/test_lime_10_100.html')
