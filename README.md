@@ -9,6 +9,15 @@
 - output format html? ID in file name, LIME does not store IDs
 - machine available?
 
+# Parameters
+|              | default    | proposal | comment                                                      |
+|--------------|------------|----------|--------------------------------------------------------------|
+| num_samples  | 5000       |          | Number of pertubations (neighborhood size for linear approx) |
+| top_labels   | deactivate | 3        |                                                              |
+| num_features | 10         |          | for text classifiers: words                                  |
+|              |            |          |                                                              |
+|              |            |          |                                                              |
+
 
 # Problem #1
 
