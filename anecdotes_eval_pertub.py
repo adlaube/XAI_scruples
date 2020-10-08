@@ -52,9 +52,9 @@ dataset_features = [x['title'] + x['text'] for x in data]
 keys = ['title', 'text']
 
 
-instance_idx = 20
+instance_idx = 0
 test_instance = [{x:data[instance_idx][x] for x in keys}]
-test_features = test_instance[instance_idx]['title'] + test_instance[instance_idx]['text']
+test_features = test_instance[0]['title'] + test_instance[0]['text']
 
 exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=100,top_labels=3) #LIME only wants one string...
 exp.save_to_file('exp/anecdotes/test_lime_20_100.html')
@@ -71,7 +71,7 @@ exp.save_to_file('exp/anecdotes/test_lime_20_3000.html')
 
 instance_idx = 10
 test_instance = [{x:data[instance_idx][x] for x in keys}]
-test_features = test_instance[instance_idx]['title'] + test_instance[instance_idx]['text']
+test_features = test_instance[0]['title'] + test_instance[0]['text']
 
 exp = explainer.explain_instance(test_features,predictor,num_features=10,num_samples=100,top_labels=3) #LIME only wants one string...
 exp.save_to_file('exp/anecdotes/test_lime_10_100.html')

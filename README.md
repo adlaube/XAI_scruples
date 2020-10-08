@@ -10,14 +10,13 @@
 - machine available?
 
 # Parameters
-|              | default    | proposal | comment                                                      |
-|--------------|------------|----------|--------------------------------------------------------------|
-| num_samples  | 5000       |          | Number of pertubations (neighborhood size for linear approx) |
-| top_labels   | deactivate | 3        |                                                              |
-| num_features | 10         |          | for text classifiers: words                                  |
-|              |            |          |                                                              |
-|              |            |          |                                                              |
-
+|              | runtime influence | default    | proposal        | comment                                                                                            |
+|--------------|-------------------|------------|-----------------|----------------------------------------------------------------------------------------------------|
+| num_samples  | Y                 | 5000       | 1000 < K < 5000 | Number of pertubations (neighborhood size for linear approx)  guess based on average word count?   |
+| top_labels   | Y                 | deactivate | 3               |                                                                                                    |
+| num_features | N                 | 10         | 10              | for text classifiers: words                                                                        |
+|              |                   |            |                 |                                                                                                    |
+|              |                   |            |                 |                                                                                                    |
 
 # Problem #1
 
