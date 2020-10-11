@@ -23,3 +23,14 @@
 - SP API lässt pertubation sample size nicht umstellen, ist default auf 5000
 - single explanation with 10 pertubations: 14s CPU, 
 - single explanation with 5000 pertubations: 6532s CPU, 348s GPU
+
+
+
+# Problem #2
+
+- version conflict anchors and scruples with scikit-learn, check deactivated in setup.py of scruples
+
+# Problem #3
+
+- length of texts for anchors + BERT: exceeds max length of 512 tokens, solutions? https://www.thepythoncode.com/article/text-summarization-using-huggingface-transformers-python 
+-  increase max length? how does norms handle this in Roberta? config for embeddings 

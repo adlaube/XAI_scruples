@@ -25,7 +25,7 @@ def get_merged_instance(instance_idx):
         test_features = instance[0]['title'] + instance[0]['text']
         return test_features
 
-def anecdotes_predict(texts):
+def anecdotes_predict_lime(texts):
 
         instances=[]
         for text in texts:
@@ -38,8 +38,8 @@ def anecdotes_predict(texts):
         #response = requests.post('https://norms.apps.allenai.org/api/corpus/predict',json=instances)
         response = requests.post('http://127.0.0.1:5050/api/corpus/predict',json=instances)
         response_json = json.loads(response.text) #will throw exception if num of samples is too high
-        #calc probabilities by dividing by sum of alphas
-        probabilties = [[
+        #calc means of the returned alpha values for the dirichlet distribution
+        means = [[
                         x['AUTHOR']/sum(x.values()),
                         x['OTHER']/sum(x.values()),
                         x['EVERYBODY']/sum(x.values()),
@@ -47,4 +47,24 @@ def anecdotes_predict(texts):
                         x['INFO']/sum(x.values())]
                         for x in response_json
                         ]
-        return np.reshape(np.asarray(probabilties),(-1,5))
+        return np.reshape(np.asarray(means),(-1,5))
+
+
+def anecdotes_predict_anchor(texts):
+
+        instances=[]
+        for text in texts:
+                instance = {
+                        'title':'',
+                        'text':text
+                }
+                instances.append(instance)
+        
+        #response = requests.post('https://norms.apps.allenai.org/api/corpus/predict',json=instances)
+        response = requests.post('http://127.0.0.1:5050/api/corpus/predict',json=instances)
+        response_json = json.loads(response.text) #will throw exception if num of samples is too high
+        #prediction is the label with the highest alpha score
+        predicted_labels = [max(response_dict, key=response_dict.get)
+                        for response_dict in response_json
+                        ]
+        return predicted_labels
