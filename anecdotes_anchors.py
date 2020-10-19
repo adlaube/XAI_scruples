@@ -4,8 +4,8 @@ import spacy
 
 
 instance_idx = 0
-#nlp = spacy.load('en_core_web_lg')
-nlp = spacy.load('en_core_web_sm') #FOR BERT
+nlp = spacy.load('en_core_web_lg')
+#nlp = spacy.load('en_core_web_sm') #FOR BERT but throws error when using
 explainer = anchor_text.AnchorText(nlp, anecdotes_labels, use_unk_distribution=False, use_bert=True)
 
 
