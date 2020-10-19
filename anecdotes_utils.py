@@ -83,4 +83,4 @@ def anecdotes_predict_anchor(texts):
         predicted_labels = [max(response_dict, key=response_dict.get)
                         for response_dict in response_json
                         ]
-        return predicted_labels
+        return np.array(predicted_labels)
