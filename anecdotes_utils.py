@@ -26,7 +26,7 @@ def get_merged_instance(instance_idx,truncate=False):
         instance = [{x:data[instance_idx][x] for x in keys}]
         merged_instance = instance[0]['title'] + instance[0]['text']
 
-        PARAM_MAX_WORD_LENGTH = 400
+        PARAM_MAX_WORD_LENGTH = 300
         split_instance = merged_instance.split(" ")
         if truncate == True:
                 total_word_count = len(split_instance)
@@ -76,11 +76,15 @@ def anecdotes_predict_anchor(texts):
                 }
                 instances.append(instance)
         
-        response = requests.post('https://norms.apps.allenai.org/api/corpus/predict',json=instances)
-        #response = requests.post('http://127.0.0.1:5050/api/corpus/predict',json=instances)
+       # response = requests.post('https://norms.apps.allenai.org/api/corpus/predict',json=instances)
+        response = requests.post('http://127.0.0.1:5050/api/corpus/predict',json=instances)
         response_json = json.loads(response.text) #will throw exception if num of samples is too high
         #prediction is the label with the highest alpha score
         predicted_labels = [max(response_dict, key=response_dict.get)
                         for response_dict in response_json
                         ]
+
+
+
         return np.array(predicted_labels)
+
