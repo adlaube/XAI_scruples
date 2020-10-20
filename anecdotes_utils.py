@@ -3,6 +3,15 @@ import json
 import requests
 import os
 
+""" from scruples.demos.norms import utils
+
+dataset = utils.PredictionDataset(
+        features=[
+                [instance['title'], instance['text']]
+                for instance in instances
+        ],
+        transform=featurize) """
+
 anecdotes_labels = ["AUTHOR", "OTHER", "EVERYBODY", "NOBODY", "INFO"]
 
 

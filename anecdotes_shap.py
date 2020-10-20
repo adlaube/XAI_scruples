@@ -7,13 +7,14 @@ anecdotes_dataset_array = np.array(anecdotes_dataset)
 model,featurize,delabelize = load_model(dataset='corpus')
 
 
-
 instance_idx = 0
 test_sample = get_merged_instance(instance_idx,truncate=True)
 
 #background dataset that can be used as expectation
 background = anecdotes_dataset_array[np.random.choice(len(anecdotes_dataset),100,replace=False)]
-
+device = get_device()
+with torch.no_grad():
+        background.to(device)
 explainershap = shap.DeepExplainer(model,background)
 shap_values_matrix = explainershap.shap_values(test_sample)
 shap.summary_plot(shap_values_matrix,test_sample)#ä,feature_names=dataset.feature_names)
