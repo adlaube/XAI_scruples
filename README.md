@@ -30,6 +30,12 @@
 - length of texts for anchors + BERT: exceeds max length of 512 tokens, solutions? https://www.thepythoncode.com/article/text-summarization-using-huggingface-transformers-python 
 -  increase max length? how does norms handle this in Roberta? config for embeddings 
 
+
+### SHAP problems
+
+- model expected input does not match standard pytorch NN module interface
+
+
 ### Fixed problems
 
 - version conflict anchors and scruples with scikit-learn, check deactivated in setup.py of scruples
