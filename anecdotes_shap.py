@@ -26,7 +26,7 @@ with torch.no_grad():
 
 
 test_sample = featurize(anecdotes_dataset[0])
-explainershap = shap.DeepExplainer(model,background_features) #shap requires background data to be one tensor only
+explainershap = shap.DeepExplainer(model,[background_features]) #shap requires background data to be one tensor only
 shap_values_matrix = explainershap.shap_values(test_sample)
 shap.summary_plot(shap_values_matrix,test_sample)#ä,feature_names=dataset.feature_names)
 print('done')

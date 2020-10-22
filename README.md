@@ -33,7 +33,7 @@
 
 ### SHAP problems
 
-- model expected input does not match standard pytorch NN module interface
+- shap code does not properly propagate input ids and attention mask 
 
 
 ### Fixed problems
