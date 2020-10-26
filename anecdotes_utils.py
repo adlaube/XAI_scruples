@@ -35,7 +35,7 @@ def get_merged_instance(instance_idx,truncate=False):
         instance = [{x:data[instance_idx][x] for x in keys}]
         merged_instance = instance[0]['title'] + instance[0]['text']
 
-        PARAM_MAX_WORD_LENGTH = 300
+        PARAM_MAX_WORD_LENGTH = 10
         split_instance = merged_instance.split(" ")
         if truncate == True:
                 total_word_count = len(split_instance)

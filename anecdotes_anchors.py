@@ -11,7 +11,7 @@ explainer = anchor_text.AnchorText(nlp, anecdotes_labels, use_unk_distribution=F
 
 # BERT limits to 512 tokens, anchor implementation does not take this into account 
 # so anecdotes are truncated before being explained
-exp = explainer.explain_instance(get_merged_instance(instance_idx,truncate=True),anecdotes_predict_anchor,threshold=0.95)
+exp = explainer.explain_instance(get_merged_instance(instance_idx,truncate=True),anecdotes_predict_anchor,threshold=0.9)
 exp.save_to_file(anecdotes_exp_dir+"anchor0.html")
 print('done')
 
