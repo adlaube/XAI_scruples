@@ -5,10 +5,8 @@
 
 ## Next steps
 - LIME pertubations dependent on word count
-- run SP LIME on subset
-- fix anchors
-- integrate SHAP
-- benchmark and report
+- create set of LIME explanations
+- ?
 
 ## LIME Parameters
 |              | runtime influence | default    | proposal        | comment                                                                                            |
