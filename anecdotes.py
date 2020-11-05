@@ -1,4 +1,5 @@
 from anecdotes_LIME import explain_anecdote_lime
+from anecdotes_utils import anecdotes_labels
 
 import numpy as np
 
@@ -13,6 +14,9 @@ if __name__ == "__main__":
                                         203, 1949,  138, 2437,  506,  401, 2212, 1652,  807,  221,  110,
                                 2478,  567,  551,   69, 1911, 1851],dtype=np.uint32)
         
+        anecdotes_labels_np = np.array(anecdotes_labels)
+        test_labels = anecdotes_labels_np[test_indices]
+
 
         for idx in test_indices:
                 explain_anecdote_lime(idx,10)

@@ -23,6 +23,7 @@ with open(anecdotes_exp_dir + 'test.scruples-corpus.jsonl', 'r') as datafile:
         data.append(row)
 
 anecdotes_dataset = [x['title'] + x['text'] for x in data]
+anecdotes_labels = [x['label'] for x in data]
 
 
 """ Arguments:  - index to instance from dataset
