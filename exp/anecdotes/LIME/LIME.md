@@ -7,18 +7,10 @@
 
 
 ## General Observations
-- personal pronouns are always part of the explanation
-- feature contributions of highlight words are high rather than features that rely on context
+- personal pronouns are always part of the explanations
+- feature contributions of single words are high rather than features that rely on context
+- never, always are often part of the explanation [877](LIME_877.html)
 - hardly any peaks in feature contributions
-- feeling related features strongly contribute towards NOBODY (only empathetic parties - no one the asshole?)
-- family, relationships or pregnancies are almost always part of the explanation, abbreviations are understoof (gf, ex)
+- feeling related features contribute towards NOBODY (only empathetic parties - no one the asshole?) [944](LIME_944.html)
+- family, relationships or pregnancies are almost always part of the explanation, abbreviations are understoof (gf, ex) [138](LIME_138.html) & [1138](LIME_1138.html)
 - 
-
-
-138
-944
-976
-
-
-|[69](LIME_69.html) | OTHER | OK | 8 |
-|[110](./LIME_110.html) | OTHER | OK | 6 |
