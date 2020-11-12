@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
         for idx in sample_indices:
                 #explain_anecdote_lime(idx,10)
-                explain_anecdote_lime(idx,10,1000)
+                explain_anecdote_lime(idx,10,10000)
         
     
     
