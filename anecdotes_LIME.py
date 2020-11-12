@@ -10,8 +10,8 @@ from anecdotes_utils import anecdotes_predict_lime, anecdotes_labels, anecdotes_
 def explain_anecdote_lime(index: int,num_of_features: int,num_of_pertubations: int = None):
         explainer = LimeTextExplainer(class_names=anecdotes_labels)
         features = get_merged_instance(index)
+        anecdote_word_count = len(features)
         if num_of_pertubations is None:
-                anecdote_word_count = len(features)
                 num_of_pertubations = np.rint(np.min([np.power(anecdote_word_count,1.2),4000]))
                 num_of_pertubations = np.int16(num_of_pertubations)
 
