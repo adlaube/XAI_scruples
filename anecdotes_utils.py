@@ -15,16 +15,12 @@ dataset = utils.PredictionDataset(
 anecdotes_labels = ["AUTHOR", "OTHER", "EVERYBODY", "NOBODY", "INFO"]
 
 
-data = []
+anecdotes_data = []
 anecdotes_exp_dir = os.getcwd() + "/data/anecdotes/"
 with open(anecdotes_exp_dir + 'test.scruples-corpus.jsonl', 'r') as datafile:
     for ln in datafile:
         row = json.loads(ln)
-        data.append(row)
-
-anecdotes_dataset = [x['title'] + x['text'] for x in data]
-anecdotes_labels = [x['label'] for x in data]
-
+        anecdotes_data.append(row)
 
 """ Arguments:  - index to instance from dataset
                 - truncation if needed, extract head and tail of instance
@@ -33,7 +29,7 @@ anecdotes_labels = [x['label'] for x in data]
 
 def get_merged_instance(instance_idx,truncate=False):
         keys = ['title', 'text']
-        instance = [{x:data[instance_idx][x] for x in keys}]
+        instance = [{x:anecdotes_data[instance_idx][x] for x in keys}]
         merged_instance = instance[0]['title'] + instance[0]['text']
 
         PARAM_MAX_WORD_LENGTH = 50
