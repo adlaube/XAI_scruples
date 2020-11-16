@@ -20,6 +20,7 @@ def explain_anecdote_lime(index: int,param_dict: dict):
         #start = time.time()
         exp = explainer.explain_instance(features,anecdotes_predict_lime,num_features=param_dict['number_of_features'],
                                                 num_samples=num_of_pertubations) 
+
         #end = time.time()
         
         #exp.save_to_file(str('exp/anecdotes/' + str(index) + '_LIME_' + str(num_of_pertubations) + '_' + str(anecdote_word_count) + '.html'))
