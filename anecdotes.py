@@ -31,13 +31,18 @@ if __name__ == "__main__":
                         }
 
 
+        soup = BeautifulSoup()
+        b_tag = soup.new_tag('b')
         out_soup = None
         for idx in sample_indices:
+                idx_as_string = str(idx)
+                b_tag.string = idx_as_string
                 exp = explain_anecdote_lime(idx,param_dict)
                 exp_html = exp.as_html()
                 exp_soup = BeautifulSoup(exp_html)
 
                 if out_soup is None:
+                        exp_soup.body.insert(0,b_tag)
                         out_soup = exp_soup
                 else:
                         out_soup.body.append(exp_soup.body)
