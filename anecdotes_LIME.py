@@ -18,8 +18,10 @@ def explain_anecdote_lime(index: int,param_dict: dict):
                 num_of_pertubations = param_dict['max_number_of_pertubations']
 
         #start = time.time()
-        exp = explainer.explain_instance(features,anecdotes_predict_lime,num_features=param_dict['number_of_features'],
-                                                num_samples=num_of_pertubations) 
+        exp = explainer.explain_instance(features,anecdotes_predict_lime,
+                                                num_features=param_dict['number_of_features'],
+                                                num_samples=num_of_pertubations,
+                                                top_labels=5) 
 
         #end = time.time()
         
