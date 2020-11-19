@@ -1,8 +1,13 @@
 from anecdotes_LIME import explain_anecdote_lime
 from anecdotes_utils import anecdotes_data,anecdotes_labels
 
+from datetime import datetime
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+from collections import Counter
 
 from bs4 import BeautifulSoup
 
@@ -17,14 +22,30 @@ if __name__ == "__main__":
 
         sample_indices = np.array([1,2,3])
         sample_indices = np.sort(sample_indices)
+
+        ## META DATAFRAME
+        meta_columns_df = ['Date','Code commit', 'Sample selection' ]
+        meta_df = pd.DataFrame()
+        meta_df['Date'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         
         ## MAIN DATAFRAME
         anecdotes_df = pd.DataFrame(anecdotes_data)
         anecdotes_df = anecdotes_df.iloc[sample_indices]
 
-        sample_feature_len_hist = anecdotes_df['text'].str.len()
-        sample_label_hist = anecdotes_df['label'].value_counts()
-        sample_type_hist = anecdotes_df['post_type'].value_counts()
+        anecdotes_df['text length'] = anecdotes_df['text'].str.len()
+        anecdotes_df.hist(column=['text length'],bins = 5)
+        plt.title('text length distribution')
+        plt.savefig('textlength_hist.png')
+
+        sample_label_df = anecdotes_df['label'].value_counts()
+        sample_label_df.hist()
+        plt.title('class distribution')
+        plt.savefig('label_hist.png')
+
+        sample_type_df = anecdotes_df['post_type'].value_counts()
+        sample_type_df.hist()
+        plt.title('type distribution')
+        plt.savefig('type_hist.png')
         #label_scores count useful?
 
         #hist with feature scores
@@ -32,24 +53,30 @@ if __name__ == "__main__":
         param_dict = {"max_number_of_pertubations"      :10,
                         "adaptive_pertubations"         :False,
                         "number_of_features"            :10,
-                        }     
+                        }
+        param_df = pd.DataFrame.from_records(param_dict,index=["Parameter"])
+        param_df.transpose()
 
         out_soup = None
 
         #init dataframes
-        columns_df = ["features","contributions"]
+        
         explanation_dataframes_dict = {}
-        exp_lists = []
+
+        all_exps = []
+        features_per_class = []
         for label in anecdotes_labels:
-                exp_lists.append([]) 
+                features_per_class.append([])
+                all_exps.append([])
 
         for idx in sample_indices:
 
                 exp = explain_anecdote_lime(idx,param_dict)
-                # List processing
+                all_exps[exp.top_labels[0]].append(exp) # sort per class
+                # Process features and contributions per class
                 for label_idx in range(len(anecdotes_labels)):
-                        exp_of_one_class_tuple = exp.as_list(label_idx)
-                        exp_lists[label_idx] += (exp_of_one_class_tuple)
+                        features_of_one_class_tuple = exp.as_list(label_idx)
+                        features_per_class[label_idx] += (features_of_one_class_tuple)
                 
                 # HTML processing
                 exp_html = exp.as_html()
@@ -63,14 +90,62 @@ if __name__ == "__main__":
                 else:
                         out_soup.body.append(exp_soup.body) 
 
-        #compile dataframes
+        # hist of top features + contributions
+        # feature categories hist
+        # statistics of contributions
+        # average prediction score as matrix CxC
+        # mean variance of feature positions (to indiciate where context matters), search through anecdote necessary
+        #compile dataframe per class
+        columns_features_df = ["features","contributions"]
+        
+        columns_main_df = ["class","top features"]
+        main_df = pd.DataFrame(columns=columns_main_df)
+        main_df['class'] = main_df['class'].astype(str)
+        main_df['top features'] = main_df['top features'].astype(object)
+
+
+        class_data_list = []
+        mean_probabilities = None
         for label_idx in range(len(anecdotes_labels)):
-                exp_df = pd.DataFrame(exp_lists[label_idx],columns=columns_df)
+                exp_df = pd.DataFrame(features_per_class[label_idx],columns=columns_features_df)
                 label = anecdotes_labels[label_idx]
                 explanation_dataframes_dict[label] = exp_df
+                feature_counter = Counter(exp_df['features'])
+                
+                statistics = exp_df['contributions'].describe()
+                statistics.round(2)
+                if not all_exps[label_idx]:  #needed if there is a class that has not been predicted
+                        new_probabilities = [0,0,0,0,0]
+                else:
+                        new_probabilities = np.mean(np.vstack([x.predict_proba for x in all_exps[label_idx]]),axis=0)
+                new_probabilities = np.expand_dims(new_probabilities,axis=0)
 
+                if mean_probabilities is None:
+                        mean_probabilities = new_probabilities
+                else:
+                        mean_probabilities = np.concatenate([mean_probabilities, new_probabilities])
+                class_data_list.append(feature_counter.most_common(5))
 
+        main_df['class'] = anecdotes_labels
+        main_df['top features'] = class_data_list
 
+        prob_df = pd.DataFrame(mean_probabilities,columns=anecdotes_labels,index=anecdotes_labels)
+
+        #plots
+        img_tag = out_soup.new_tag('img')
+        src_string = "src=label_hist.png"              
+        img_tag.string = src_string
+        out_soup.body.insert(0,src_string)
+
+        html_string_meta = meta_df.to_html()
+        html_string_param = param_df.to_html()
+        html_string_main = main_df.to_html()
+        html_string_prob = prob_df.to_html()
+        #bottom to top
+        out_soup.insert(0,html_string_prob)
+        out_soup.insert(0,html_string_main)
+        out_soup.insert(0,html_string_param)
+        out_soup.insert(0,html_string_meta)
         #write HTML
         with open("test.html","w") as file:
                 file.write(str(out_soup))
