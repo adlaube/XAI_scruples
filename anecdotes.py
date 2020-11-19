@@ -20,15 +20,19 @@ if __name__ == "__main__":
                                          203, 1949,  138, 2437,  506,  401, 2212, 1652,  807,  221,  110,
                                  2478,  567,  551,   69, 1911, 1851],dtype=np.uint32)
 
-        sample_indices = np.array(range(20))
+        sample_indices = np.array([1,3,5,90,40])
         sample_indices = np.sort(sample_indices)
 
         ## META DATAFRAME
         meta_columns_df = ['Date','Code commit', 'Sample selection' ]
-        meta_df = pd.DataFrame(columns=meta_columns_df)
+        meta_df = pd.DataFrame(columns=meta_columns_df,index=["Test report"])
         meta_df['Date'] = meta_df['Date'].astype(str)
-        meta_df['Date'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        
+        meta_df['Date'] = [datetime.now().strftime("%d/%m/%Y %H:%M:%S")]
+
+        meta_df['Sample selection'] = meta_df['Sample selection'].astype(str)
+        meta_df['Sample selection'] = "50 Random samples"
+
+        meta_df.transpose()
         ## MAIN DATAFRAME
         anecdotes_df = pd.DataFrame(anecdotes_data)
         anecdotes_df = anecdotes_df.iloc[sample_indices]
@@ -62,17 +66,17 @@ if __name__ == "__main__":
         param_df = pd.DataFrame.from_records(param_dict,index=["Parameter"])
         param_df.transpose()
 
-        out_soup = None
-
-        #init dataframes
         
-        explanation_dataframes_dict = {}
 
+        #inits        
         all_exps = []
         features_per_class = []
         for label in anecdotes_labels:
                 features_per_class.append([])
                 all_exps.append([])
+        out_soup = None
+
+        divider = BeautifulSoup(features='lxml').new_tag('hr')
 
         for idx in sample_indices:
 
@@ -89,18 +93,15 @@ if __name__ == "__main__":
                 b_tag = exp_soup.new_tag('b')
                 idx_as_string = str(idx)                
                 b_tag.string = idx_as_string
+                exp_soup.body.insert(0,divider)
                 exp_soup.body.insert(0,b_tag)
                 if out_soup is None:    
                         out_soup = exp_soup
                 else:
                         out_soup.body.append(exp_soup.body) 
 
-        # hist of top features + contributions
-        # feature categories hist
-        # statistics of contributions
-        # average prediction score as matrix CxC
+
         # mean variance of feature positions (to indiciate where context matters), search through anecdote necessary
-        #compile dataframe per class
         columns_features_df = ["features","contributions"]
         
         columns_main_df = ["class","top features"]
@@ -114,7 +115,6 @@ if __name__ == "__main__":
         for label_idx in range(len(anecdotes_labels)):
                 exp_df = pd.DataFrame(features_per_class[label_idx],columns=columns_features_df)
                 label = anecdotes_labels[label_idx]
-                explanation_dataframes_dict[label] = exp_df
                 feature_counter = Counter(exp_df['features'])
                 
                 statistics = exp_df['contributions'].describe()
@@ -130,16 +130,15 @@ if __name__ == "__main__":
                 else:
                         mean_probabilities = np.concatenate([mean_probabilities, new_probabilities])
 
-                features_df = pd.DataFrame(feature_counter.most_common(5),columns=['feature','count'])
+                features_df = pd.DataFrame(feature_counter.most_common(5),columns=[label + ' features','count'])
                 features_df.name = label
                 class_soup_list.append(BeautifulSoup(features_df.to_html(),'html.parser'))
+                class_soup_list.append(BeautifulSoup(statistics.to_frame().to_html(),'html.parser'))
+
 
 
         prob_df = pd.DataFrame(mean_probabilities,columns=anecdotes_labels,index=anecdotes_labels)
 
-        #plots
-        img_tag = out_soup.new_tag('img',src='label_hist.png',alt='labelhist')
-        out_soup.body.insert(0,img_tag)
 
         html_string_meta = meta_df.to_html()
         meta_soup = BeautifulSoup(html_string_meta,'html.parser')
@@ -147,18 +146,29 @@ if __name__ == "__main__":
         html_string_param = param_df.to_html()
         param_soup = BeautifulSoup(html_string_param,'html.parser')
 
-        html_string_main = main_df.to_html()
-        main_soup = BeautifulSoup(html_string_main,'html.parser')
-
         html_string_prob = prob_df.to_html()
         prob_soup = BeautifulSoup(html_string_prob,'html.parser')
 
         #bottom to top
         for soup in class_soup_list:
+                out_soup.body.insert(0,divider)
                 out_soup.body.insert(0,soup)
+
+        out_soup.body.insert(0,divider)                
         out_soup.body.insert(0,prob_soup)
-        out_soup.body.insert(0,main_soup)
+        
+        img_tag = out_soup.new_tag('img',src='textlength_hist.png',alt='hist')
+        out_soup.body.insert(0,img_tag)       
+
+        img_tag = out_soup.new_tag('img',src='type_hist.png',alt='hist')
+        out_soup.body.insert(0,img_tag)
+        
+        img_tag = out_soup.new_tag('img',src='label_hist.png',alt='hist')
+        out_soup.body.insert(0,img_tag)
+
+        out_soup.body.insert(0,divider)
         out_soup.body.insert(0,param_soup)
+        out_soup.body.insert(0,divider)
         out_soup.body.insert(0,meta_soup)
 
         #write HTML
