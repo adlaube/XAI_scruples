@@ -15,8 +15,8 @@ import pickle
 
 if __name__ == "__main__":
 
-        param_dict = {"max_number_of_pertubations"      :20,
-                        "adaptive_pertubations"         :False,
+        param_dict = {"max_number_of_pertubations"      :4000,
+                        "adaptive_pertubations"         :True,
                         "number_of_features"            :10,
                         }        
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
                                          203, 1949,  138, 2437,  506,  401, 2212, 1652,  807,  221,  110,
                                  2478,  567,  551,   69, 1911, 1851],dtype=np.uint32)
 
-        sample_indices = sample_indices[0:20]
+        #sample_indices = sample_indices[0:20]
         sample_indices = np.sort(sample_indices)
 
         ## META DATAFRAME
@@ -179,7 +179,7 @@ if __name__ == "__main__":
         out_soup.body.insert(0,meta_soup)
 
         #write HTML
-        with open("test.html","w") as file:
+        with open("report.html","w") as file:
                 file.write(str(out_soup))
 
         #write pickle
