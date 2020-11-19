@@ -133,19 +133,27 @@ if __name__ == "__main__":
 
         #plots
         img_tag = out_soup.new_tag('img')
-        src_string = "src=\"label_hist\".png " + "alt=\"labelhist\""           
+        src_string = "src=\"label_hist.png\" " + "alt=\"labelhist\""           
         img_tag.string = src_string
         out_soup.body.insert(0,src_string)
 
         html_string_meta = meta_df.to_html()
+        meta_soup = BeautifulSoup(html_string_meta,features="lxml")
+
         html_string_param = param_df.to_html()
+        param_soup = BeautifulSoup(html_string_param,features="lxml")
+
         html_string_main = main_df.to_html()
+        main_soup = BeautifulSoup(html_string_main,features="lxml")
+
         html_string_prob = prob_df.to_html()
+        prob_soup = BeautifulSoup(html_string_prob,features="lxml")
+
         #bottom to top
-        out_soup.body.insert(0,html_string_prob)
-        out_soup.body.insert(0,html_string_main)
-        out_soup.body.insert(0,html_string_param)
-        out_soup.body.insert(0,html_string_meta)
+        out_soup.body.insert(0,prob_soup)
+        out_soup.body.insert(0,main_soup)
+        out_soup.body.insert(0,param_soup)
+        out_soup.body.insert(0,meta_soup)
         #write HTML
         with open("test.html","w") as file:
                 file.write(str(out_soup))
