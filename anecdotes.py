@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
         #plots
         img_tag = out_soup.new_tag('img')
-        src_string = "src=label_hist.png"              
+        src_string = "src=\"label_hist\".png " + "alt=\"labelhist\"             
         img_tag.string = src_string
         out_soup.body.insert(0,src_string)
 
@@ -142,10 +142,10 @@ if __name__ == "__main__":
         html_string_main = main_df.to_html()
         html_string_prob = prob_df.to_html()
         #bottom to top
-        out_soup.insert(0,html_string_prob)
-        out_soup.insert(0,html_string_main)
-        out_soup.insert(0,html_string_param)
-        out_soup.insert(0,html_string_meta)
+        out_soup.body.insert(0,html_string_prob)
+        out_soup.body.insert(0,html_string_main)
+        out_soup.body.insert(0,html_string_param)
+        out_soup.body.insert(0,html_string_meta)
         #write HTML
         with open("test.html","w") as file:
                 file.write(str(out_soup))
