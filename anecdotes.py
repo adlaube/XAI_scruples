@@ -10,7 +10,7 @@ import pandas as pd
 from collections import Counter
 
 from bs4 import BeautifulSoup
-
+import subprocess
 import pickle
 
 if __name__ == "__main__":
@@ -35,7 +35,8 @@ if __name__ == "__main__":
         meta_df = pd.DataFrame(columns=meta_columns_df,index=["Test report"])
         meta_df['Date'] = meta_df['Date'].astype(str)
         meta_df['Date'] = [datetime.now().strftime("%d/%m/%Y %H:%M:%S")]
-
+        meta_df['Code commit'] = meta_df['Code commit'].astype(str)
+        meta_df['Code commit'] = subprocess.check_output(["git", "describe"]).strip()
         meta_df['Sample selection'] = meta_df['Sample selection'].astype(str)
         meta_df['Sample selection'] = "50 Random samples"
 
