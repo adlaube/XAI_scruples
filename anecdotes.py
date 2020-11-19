@@ -20,12 +20,13 @@ if __name__ == "__main__":
                                          203, 1949,  138, 2437,  506,  401, 2212, 1652,  807,  221,  110,
                                  2478,  567,  551,   69, 1911, 1851],dtype=np.uint32)
 
-        sample_indices = np.array([1,2,3])
+        sample_indices = np.array(range(20))
         sample_indices = np.sort(sample_indices)
 
         ## META DATAFRAME
         meta_columns_df = ['Date','Code commit', 'Sample selection' ]
-        meta_df = pd.DataFrame()
+        meta_df = pd.DataFrame(columns=meta_columns_df)
+        meta_df['Date'] = meta_df['Date'].astype(str)
         meta_df['Date'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         
         ## MAIN DATAFRAME
@@ -33,17 +34,21 @@ if __name__ == "__main__":
         anecdotes_df = anecdotes_df.iloc[sample_indices]
 
         anecdotes_df['text length'] = anecdotes_df['text'].str.len()
-        anecdotes_df.hist(column=['text length'],bins = 5)
+        anecdotes_df.hist(column=['text length'],bins = 10)
+        #anecdotes_df['text length'].plot(kind='bar')
         plt.title('text length distribution')
         plt.savefig('textlength_hist.png')
 
         sample_label_df = anecdotes_df['label'].value_counts()
-        sample_label_df.hist()
+        sample_label_df.plot(kind='bar')
         plt.title('class distribution')
+        plt.xticks(rotation=10)
         plt.savefig('label_hist.png')
 
         sample_type_df = anecdotes_df['post_type'].value_counts()
-        sample_type_df.hist()
+        #sample_type_df.hist()
+        sample_type_df.plot(kind='bar')
+        plt.xticks(rotation=10)
         plt.title('type distribution')
         plt.savefig('type_hist.png')
         #label_scores count useful?
@@ -104,7 +109,7 @@ if __name__ == "__main__":
         main_df['top features'] = main_df['top features'].astype(object)
 
 
-        class_data_list = []
+        class_soup_list = []
         mean_probabilities = None
         for label_idx in range(len(anecdotes_labels)):
                 exp_df = pd.DataFrame(features_per_class[label_idx],columns=columns_features_df)
@@ -124,10 +129,11 @@ if __name__ == "__main__":
                         mean_probabilities = new_probabilities
                 else:
                         mean_probabilities = np.concatenate([mean_probabilities, new_probabilities])
-                class_data_list.append(feature_counter.most_common(5))
 
-        main_df['class'] = anecdotes_labels
-        main_df['top features'] = class_data_list
+                features_df = pd.DataFrame(feature_counter.most_common(5),columns=['feature','count'])
+                features_df.name = label
+                class_soup_list.append(BeautifulSoup(features_df.to_html(),'html.parser'))
+
 
         prob_df = pd.DataFrame(mean_probabilities,columns=anecdotes_labels,index=anecdotes_labels)
 
@@ -148,10 +154,13 @@ if __name__ == "__main__":
         prob_soup = BeautifulSoup(html_string_prob,'html.parser')
 
         #bottom to top
+        for soup in class_soup_list:
+                out_soup.body.insert(0,soup)
         out_soup.body.insert(0,prob_soup)
         out_soup.body.insert(0,main_soup)
         out_soup.body.insert(0,param_soup)
         out_soup.body.insert(0,meta_soup)
+
         #write HTML
         with open("test.html","w") as file:
                 file.write(str(out_soup))
