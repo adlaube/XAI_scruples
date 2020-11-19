@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
         #plots
         img_tag = out_soup.new_tag('img')
-        src_string = "src=\"label_hist\".png " + "alt=\"labelhist\"             
+        src_string = "src=\"label_hist\".png " + "alt=\"labelhist\""           
         img_tag.string = src_string
         out_soup.body.insert(0,src_string)
 
