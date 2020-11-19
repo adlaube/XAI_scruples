@@ -132,22 +132,20 @@ if __name__ == "__main__":
         prob_df = pd.DataFrame(mean_probabilities,columns=anecdotes_labels,index=anecdotes_labels)
 
         #plots
-        img_tag = out_soup.new_tag('img')
-        src_string = "src=\"label_hist.png\" " + "alt=\"labelhist\""           
-        img_tag.string = src_string
-        out_soup.body.insert(0,src_string)
+        img_tag = out_soup.new_tag('img',src='label_hist.png',alt='labelhist')
+        out_soup.body.insert(0,img_tag)
 
         html_string_meta = meta_df.to_html()
-        meta_soup = BeautifulSoup(html_string_meta,features="lxml")
+        meta_soup = BeautifulSoup(html_string_meta,'html.parser')
 
         html_string_param = param_df.to_html()
-        param_soup = BeautifulSoup(html_string_param,features="lxml")
+        param_soup = BeautifulSoup(html_string_param,'html.parser')
 
         html_string_main = main_df.to_html()
-        main_soup = BeautifulSoup(html_string_main,features="lxml")
+        main_soup = BeautifulSoup(html_string_main,'html.parser')
 
         html_string_prob = prob_df.to_html()
-        prob_soup = BeautifulSoup(html_string_prob,features="lxml")
+        prob_soup = BeautifulSoup(html_string_prob,'html.parser')
 
         #bottom to top
         out_soup.body.insert(0,prob_soup)
