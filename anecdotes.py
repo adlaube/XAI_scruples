@@ -11,6 +11,8 @@ from collections import Counter
 
 from bs4 import BeautifulSoup
 
+import pickle
+
 if __name__ == "__main__":
 
         #np.random.randint(0,2500,50,np.uint32)
@@ -57,6 +59,7 @@ if __name__ == "__main__":
         plt.savefig('type_hist.png')
         #label_scores count useful?
 
+        plt.clf()
         #hist with feature scores
 
         param_dict = {"max_number_of_pertubations"      :10,
@@ -117,8 +120,9 @@ if __name__ == "__main__":
                 label = anecdotes_labels[label_idx]
                 feature_counter = Counter(exp_df['features'])
                 
-                statistics = exp_df['contributions'].describe()
-                statistics.round(2)
+                exp_df.boxplot(column=['contributions'])
+                plt.title(label + " box plot")
+                plt.savefig(label+ ".png")
                 if not all_exps[label_idx]:  #needed if there is a class that has not been predicted
                         new_probabilities = [0,0,0,0,0]
                 else:
@@ -132,10 +136,11 @@ if __name__ == "__main__":
 
                 features_df = pd.DataFrame(feature_counter.most_common(5),columns=[label + ' features','count'])
                 features_df.name = label
+                img_soup = out_soup.new_tag('img',src=label+'.png',alt='hist')                
                 class_soup_list.append(BeautifulSoup(features_df.to_html(),'html.parser'))
-                class_soup_list.append(BeautifulSoup(statistics.to_frame().to_html(),'html.parser'))
-
-
+                class_soup_list.append(img_soup)
+                
+        
 
         prob_df = pd.DataFrame(mean_probabilities,columns=anecdotes_labels,index=anecdotes_labels)
 
@@ -153,6 +158,7 @@ if __name__ == "__main__":
         for soup in class_soup_list:
                 out_soup.body.insert(0,divider)
                 out_soup.body.insert(0,soup)
+                
 
         out_soup.body.insert(0,divider)                
         out_soup.body.insert(0,prob_soup)
@@ -174,6 +180,10 @@ if __name__ == "__main__":
         #write HTML
         with open("test.html","w") as file:
                 file.write(str(out_soup))
+
+        #write pickle
+        pickle.dump(all_exps,open("out.pickle","wb"))
+
 
         
     
