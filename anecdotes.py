@@ -28,6 +28,30 @@ def get_explanation(idx : int, param_dict : dict):
                 exp = explain_anecdote_lime(idx,param_dict)
         return exp
 
+def plot_dataset_info(anecdotes_df : pd.DataFrame):
+        anecdotes_df['text length'] = anecdotes_df['text'].str.len()
+        anecdotes_df.hist(column=['text length'],bins = 10)
+        #anecdotes_df['text length'].plot(kind='bar')
+        plt.title('text length distribution')
+        plt.savefig('textlength_hist.png')
+
+        sample_label_df = anecdotes_df['label'].value_counts()
+        sample_label_df.plot(kind='bar')
+        plt.title('class distribution')
+        plt.xticks(rotation=10)
+        plt.savefig('label_hist.png')
+
+        sample_type_df = anecdotes_df['post_type'].value_counts()
+        #sample_type_df.hist()
+        sample_type_df.plot(kind='bar')
+        plt.xticks(rotation=10)
+        plt.title('type distribution')
+        plt.savefig('type_hist.png')
+        #label_scores count useful?
+
+        plt.clf()
+        #hist with feature scores        
+
 if __name__ == "__main__":
 
         param_dict = {"max_number_of_pertubations"      :4000,
@@ -59,30 +83,8 @@ if __name__ == "__main__":
         ## MAIN DATAFRAME
         anecdotes_df = pd.DataFrame(anecdotes_data)
         anecdotes_df = anecdotes_df.iloc[sample_indices]
-
-        anecdotes_df['text length'] = anecdotes_df['text'].str.len()
-        anecdotes_df.hist(column=['text length'],bins = 10)
-        #anecdotes_df['text length'].plot(kind='bar')
-        plt.title('text length distribution')
-        plt.savefig('textlength_hist.png')
-
-        sample_label_df = anecdotes_df['label'].value_counts()
-        sample_label_df.plot(kind='bar')
-        plt.title('class distribution')
-        plt.xticks(rotation=10)
-        plt.savefig('label_hist.png')
-
-        sample_type_df = anecdotes_df['post_type'].value_counts()
-        #sample_type_df.hist()
-        sample_type_df.plot(kind='bar')
-        plt.xticks(rotation=10)
-        plt.title('type distribution')
-        plt.savefig('type_hist.png')
-        #label_scores count useful?
-
-        plt.clf()
-        #hist with feature scores
-
+        plot_dataset_info(anecdotes_df)
+        
         param_df = pd.DataFrame.from_records(param_dict,index=["Parameter"])
         param_df.transpose()
 
@@ -152,8 +154,7 @@ if __name__ == "__main__":
 
                 ##determine highest contributions
                 #exp_df = exp_df.reindex(exp_df.contributions.abs().sort_values(ascending=False).index)
-                exp_df = exp_df.iloc[exp_df.contributions.abs().sort_values(ascending=False).index].reset_index(drop=True)
-                
+                exp_df = exp_df.iloc[exp_df.contributions.abs().sort_values(ascending=False).index].reset_index(drop=True) 
                 topcontributions_df = exp_df.iloc[0:19] #highest contributions as df
 
                 if not all_exps[label_idx]:  #needed if there is a class that has not been predicted
