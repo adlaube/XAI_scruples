@@ -13,6 +13,21 @@ from bs4 import BeautifulSoup
 import subprocess
 import pickle
 
+
+LOAD_FROM_PICKLE = True
+experiment_from_pickle =pickle.load(open("out.pickle","rb"))
+
+
+#ACCURACY CNT
+correct_predictions_cnt = 0
+
+def get_explanation(idx : int, param_dict : dict):
+        if LOAD_FROM_PICKLE:
+                exp = experiment_from_pickle[idx]
+        else:
+                exp = explain_anecdote_lime(idx,param_dict)
+        return exp
+
 if __name__ == "__main__":
 
         param_dict = {"max_number_of_pertubations"      :4000,
@@ -28,10 +43,10 @@ if __name__ == "__main__":
                                  2478,  567,  551,   69, 1911, 1851],dtype=np.uint32)
 
         #sample_indices = sample_indices[0:20]
-        sample_indices = np.sort(sample_indices)
+        sample_indices = np.unique(sample_indices)
 
         ## META DATAFRAME
-        meta_columns_df = ['Date','Code commit', 'Sample selection' ]
+        meta_columns_df = ['Date','Code commit', 'Sample selection','Accuracy']
         meta_df = pd.DataFrame(columns=meta_columns_df,index=["Test report"])
         meta_df['Date'] = meta_df['Date'].astype(str)
         meta_df['Date'] = [datetime.now().strftime("%d/%m/%Y %H:%M:%S")]
@@ -71,8 +86,6 @@ if __name__ == "__main__":
         param_df = pd.DataFrame.from_records(param_dict,index=["Parameter"])
         param_df.transpose()
 
-        
-
         #inits        
         all_exps = []
         features_per_class = []
@@ -83,10 +96,17 @@ if __name__ == "__main__":
 
         divider = BeautifulSoup(features='lxml').new_tag('hr')
 
+        all_exps_dict = {}
         for idx in sample_indices:
-
-                exp = explain_anecdote_lime(idx,param_dict)
+                exp = get_explanation(idx,param_dict)
+                all_exps_dict[idx] = exp
+                #exp['index'] = idx
                 all_exps[exp.top_labels[0]].append(exp) # sort per class
+
+
+                if anecdotes_labels[exp.top_labels[0]] == anecdotes_df.loc[idx]['label']:
+                        correct_predictions_cnt += 1
+
                 # Process features and contributions per class
                 for label_idx in range(len(anecdotes_labels)):
                         features_of_one_class_tuple = exp.as_list(label_idx)
@@ -96,7 +116,8 @@ if __name__ == "__main__":
                 exp_html = exp.as_html()
                 exp_soup = BeautifulSoup(exp_html,features="lxml")
                 b_tag = exp_soup.new_tag('b')
-                idx_as_string = str(idx)                
+                #write index and label
+                idx_as_string = str(idx) + " : " +anecdotes_df.loc[idx]['label']       
                 b_tag.string = idx_as_string
                 exp_soup.body.insert(0,divider)
                 exp_soup.body.insert(0,b_tag)
@@ -105,7 +126,8 @@ if __name__ == "__main__":
                 else:
                         out_soup.body.append(exp_soup.body) 
 
-
+        accuracy = correct_predictions_cnt / len(sample_indices) * 100
+        meta_df['Accuracy'] = accuracy
         # mean variance of feature positions (to indiciate where context matters), search through anecdote necessary
         columns_features_df = ["features","contributions"]
         
@@ -118,13 +140,22 @@ if __name__ == "__main__":
         class_soup_list = []
         mean_probabilities = None
         for label_idx in range(len(anecdotes_labels)):
-                exp_df = pd.DataFrame(features_per_class[label_idx],columns=columns_features_df)
+                column_feature = label + " features"
                 label = anecdotes_labels[label_idx]
-                feature_counter = Counter(exp_df['features'])
+                exp_df = pd.DataFrame(features_per_class[label_idx],columns=[column_feature,"contributions"])
+                
+                feature_counter = Counter(exp_df[column_feature])
                 plt.clf()
                 exp_df.boxplot(column=['contributions'])
                 plt.title(label + " box plot")
                 plt.savefig(label+ ".png")
+
+                ##determine highest contributions
+                #exp_df = exp_df.reindex(exp_df.contributions.abs().sort_values(ascending=False).index)
+                exp_df = exp_df.iloc[exp_df.contributions.abs().sort_values(ascending=False).index].reset_index(drop=True)
+                
+                topcontributions_df = exp_df.iloc[0:19] #highest contributions as df
+
                 if not all_exps[label_idx]:  #needed if there is a class that has not been predicted
                         new_probabilities = [0,0,0,0,0]
                 else:
@@ -135,11 +166,22 @@ if __name__ == "__main__":
                         mean_probabilities = new_probabilities
                 else:
                         mean_probabilities = np.concatenate([mean_probabilities, new_probabilities])
+                
+                features_df = pd.DataFrame()
+                for feature,cnt in feature_counter.most_common(5):
+                        feature_series = exp_df.loc[exp_df[column_feature] == feature]['contributions'].describe()
+                        feature_series[column_feature] = feature
+                        features_df = features_df.append(feature_series,ignore_index=True)
 
-                features_df = pd.DataFrame(feature_counter.most_common(5),columns=[label + ' features','count'])
-                features_df.name = label
-                img_soup = out_soup.new_tag('img',src=label+'.png',alt='hist')                
+                cols = features_df.columns.tolist()
+                new_cols = cols.copy()
+                new_cols[0] = cols[3]
+                new_cols[3] = cols[0]
+                features_df = features_df[new_cols]
+
+                img_soup = out_soup.new_tag('img',src=label+'.png',alt='hist')     
                 class_soup_list.append(BeautifulSoup(features_df.to_html(),'html.parser'))
+                class_soup_list.append(BeautifulSoup(topcontributions_df.to_html(),'html.parser'))
                 class_soup_list.append(img_soup)
                 
         
@@ -180,11 +222,11 @@ if __name__ == "__main__":
         out_soup.body.insert(0,meta_soup)
 
         #write HTML
-        with open("report.html","w") as file:
+        with open("out.html","w") as file:
                 file.write(str(out_soup))
 
         #write pickle
-        pickle.dump(all_exps,open("out.pickle","wb"))
+        pickle.dump(all_exps_dict,open("out.pickle","wb"))
 
 
         

@@ -1,13 +1,13 @@
 # Report requirements
 
-- predicted labels in exp 
+- predicted labels in exp  X
 - Feature categories (noun,verb...), how to handle slang / abbreviations? spacy
 - Feature positions
-- contribution outliers
-- statistics for top features
+- contribution outliers X
+- statistics for top features X
 - filter wrong predictions
-- accuracy (test)
-
+- accuracy (test) X
+- store id with pickle! cannot write to explanation object, separate list necessary X
 
 # Next steps
 
