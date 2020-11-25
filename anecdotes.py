@@ -13,7 +13,12 @@ from bs4 import BeautifulSoup
 import subprocess
 import pickle
 
+import en_core_web_sm
 
+
+nlp = en_core_web_sm.load()
+
+FILTER_INCORRECT_PREDICTIONS = True #will still be stored and plotted, just not considered for the class statistics
 LOAD_FROM_PICKLE = True
 experiment_from_pickle =pickle.load(open("out.pickle","rb"))
 
@@ -91,8 +96,10 @@ if __name__ == "__main__":
         #inits        
         all_exps = []
         features_per_class = []
+        pos_per_class = []
         for label in anecdotes_labels:
                 features_per_class.append([])
+                pos_per_class.append([])
                 all_exps.append([])
         out_soup = None
 
@@ -105,14 +112,31 @@ if __name__ == "__main__":
                 #exp['index'] = idx
                 all_exps[exp.top_labels[0]].append(exp) # sort per class
 
-
+                #counter for accuracy
                 if anecdotes_labels[exp.top_labels[0]] == anecdotes_df.loc[idx]['label']:
                         correct_predictions_cnt += 1
+                elif FILTER_INCORRECT_PREDICTIONS:
+                        print('skipped')
+                        continue
 
+
+                #part of speech
+                text_annotated = nlp(anecdotes_df.loc[idx]['text'])
+                
                 # Process features and contributions per class
                 for label_idx in range(len(anecdotes_labels)):
                         features_of_one_class_tuple = exp.as_list(label_idx)
+                        for feature,contribution in features_of_one_class_tuple:
+                                occurence_cnt = 0
+                                feature_pos_list = []
+                                for word in text_annotated:
+                                        if word.text == feature: #iterate over text, for multiple occurences take the last part of speech
+                                                occurence_cnt+= 1
+                                                feature_pos_list.append(word.pos_)
+
+                        pos_per_class[label_idx] += feature_pos_list    
                         features_per_class[label_idx] += (features_of_one_class_tuple)
+
                 
                 # HTML processing
                 exp_html = exp.as_html()
@@ -142,11 +166,11 @@ if __name__ == "__main__":
         class_soup_list = []
         mean_probabilities = None
         for label_idx in range(len(anecdotes_labels)):
-                column_feature = label + " features"
                 label = anecdotes_labels[label_idx]
+                column_feature = label + " features"
                 exp_df = pd.DataFrame(features_per_class[label_idx],columns=[column_feature,"contributions"])
                 
-                feature_counter = Counter(exp_df[column_feature])
+                
                 plt.clf()
                 exp_df.boxplot(column=['contributions'])
                 plt.title(label + " box plot")
@@ -168,11 +192,16 @@ if __name__ == "__main__":
                 else:
                         mean_probabilities = np.concatenate([mean_probabilities, new_probabilities])
                 
+                feature_counter = Counter(exp_df[column_feature])                
                 features_df = pd.DataFrame()
                 for feature,cnt in feature_counter.most_common(5):
                         feature_series = exp_df.loc[exp_df[column_feature] == feature]['contributions'].describe()
                         feature_series[column_feature] = feature
                         features_df = features_df.append(feature_series,ignore_index=True)
+
+                pos_counter = Counter(pos_per_class[label_idx])
+                pos_df = pd.DataFrame(pos_counter.most_common(5),columns=[label + " part of speech","count"])
+
 
                 cols = features_df.columns.tolist()
                 new_cols = cols.copy()
@@ -180,10 +209,13 @@ if __name__ == "__main__":
                 new_cols[3] = cols[0]
                 features_df = features_df[new_cols]
 
+
                 img_soup = out_soup.new_tag('img',src=label+'.png',alt='hist')     
                 class_soup_list.append(BeautifulSoup(features_df.to_html(),'html.parser'))
                 class_soup_list.append(BeautifulSoup(topcontributions_df.to_html(),'html.parser'))
+                class_soup_list.append(BeautifulSoup(pos_df.to_html(),'html.parser'))                
                 class_soup_list.append(img_soup)
+
                 
         
 

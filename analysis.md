@@ -1,8 +1,7 @@
 # Report requirements
 
 - predicted labels in exp  X
-- Feature categories (noun,verb...), how to handle slang / abbreviations? spacy
-- Feature positions
+- part of speech X
 - contribution outliers X
 - statistics for top features X
 - filter wrong predictions
