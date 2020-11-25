@@ -19,7 +19,7 @@ import en_core_web_sm
 nlp = en_core_web_sm.load()
 
 FILTER_INCORRECT_PREDICTIONS = True #will still be stored and plotted, just not considered for the class statistics
-LOAD_FROM_PICKLE = True
+LOAD_FROM_PICKLE = False
 experiment_from_pickle =pickle.load(open("out.pickle","rb"))
 
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
         param_dict = {"max_number_of_pertubations"      :4000,
                         "adaptive_pertubations"         :True,
-                        "number_of_features"            :10,
+                        "number_of_features"            :5,
                         }        
 
         #np.random.randint(0,2500,50,np.uint32)
@@ -71,6 +71,7 @@ if __name__ == "__main__":
                                          203, 1949,  138, 2437,  506,  401, 2212, 1652,  807,  221,  110,
                                  2478,  567,  551,   69, 1911, 1851],dtype=np.uint32)
 
+        sample_indices = np.random.randint(0,2500,120,np.uint32)
         #sample_indices = sample_indices[0:20]
         sample_indices = np.unique(sample_indices)
 
@@ -259,7 +260,8 @@ if __name__ == "__main__":
                 file.write(str(out_soup))
 
         #write pickle
-        pickle.dump(all_exps_dict,open("out.pickle","wb"))
+        if LOAD_FROM_PICKLE == False:
+                pickle.dump(all_exps_dict,open("out.pickle","wb"))
 
 
         
