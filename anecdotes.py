@@ -15,16 +15,12 @@ import pickle
 
 import en_core_web_sm
 
-
+## spacy for part of speech
 nlp = en_core_web_sm.load()
 
 FILTER_INCORRECT_PREDICTIONS = True  # will still be stored and plotted, just not considered for the class statistics
 LOAD_FROM_PICKLE = True
 experiment_from_pickle = pickle.load(open("exp/anecdotes/random120/out.pickle", "rb"))
-
-# ACCURACY CNT
-correct_predictions_cnt = 0
-
 
 def get_explanation(idx: int, param_dict: dict):
 	if LOAD_FROM_PICKLE:
@@ -65,10 +61,10 @@ if __name__ == "__main__":
 		"max_number_of_pertubations": 4000,
 		"adaptive_pertubations": True,
 		"number_of_features": 5,
+		"number_of_samples": 120
 	}
 
-	sample_indices = np.random.randint(0, 2500, 120, np.uint32)
-	# sample_indices = sample_indices[0:20]
+	sample_indices = np.random.randint(0, 2500, param_dict['number_of_samples'], np.uint32)
 	sample_indices = np.unique(sample_indices)
 
 	if LOAD_FROM_PICKLE:
@@ -82,19 +78,21 @@ if __name__ == "__main__":
 	meta_df["Code commit"] = meta_df["Code commit"].astype(str)
 	meta_df["Code commit"] = subprocess.check_output(["git", "describe"]).strip()
 	meta_df["Sample selection"] = meta_df["Sample selection"].astype(str)
-	meta_df["Sample selection"] = "120 Random samples"
-
+	meta_df["Sample selection"] = "random"
 	meta_df.transpose()
+
 	## MAIN DATAFRAME
 	anecdotes_df = pd.DataFrame(anecdotes_data)
 	anecdotes_df = anecdotes_df.iloc[sample_indices]
 	plot_dataset_info(anecdotes_df)
 
+	## PARAM DATAFRAME
 	param_df = pd.DataFrame.from_records(param_dict, index=["Parameter"])
 	param_df.transpose()
 
-	# inits
+	#inits
 	all_exps = []
+	all_exps_dict = {}
 	features_per_class = []
 	pos_per_class = []
 	for label in anecdotes_labels:
@@ -102,32 +100,32 @@ if __name__ == "__main__":
 		pos_per_class.append([])
 		all_exps.append([])
 	out_soup = None
+	# counter for accuracy
+	correct_predictions_cnt = 0
 
 	divider = BeautifulSoup(features="lxml").new_tag("hr")
 
-	all_exps_dict = {}
-
 	outlier_dict = {
-		la: {
+		label: {
 			"HIGH_ID": 0,
 			"HIGH_VALUE": 0,
 			"LOW_ID": 0,
 			"LOW_VALUE": 0,
 		}
-		for la in anecdotes_labels
+		for label in anecdotes_labels
 	}
 
 	for idx in sample_indices:
 		exp = get_explanation(idx, param_dict)
-		all_exps_dict[idx] = exp
-		# exp['index'] = idx
+		all_exps_dict[idx] = exp #save exp into dict
 		all_exps[exp.top_labels[0]].append(exp)  # sort per class
-		anecdotes_df.loc[idx, "prediction"] = anecdotes_labels[exp.top_labels[0]]
+		anecdotes_df.loc[idx, "prediction"] = anecdotes_labels[exp.top_labels[0]] #save prediction
+		
 		# counter for accuracy
 		if anecdotes_labels[exp.top_labels[0]] == anecdotes_df.loc[idx]["label"]:
 			correct_predictions_cnt += 1
-		elif FILTER_INCORRECT_PREDICTIONS:
-			# print("skipped")
+		elif FILTER_INCORRECT_PREDICTIONS: 
+			# skip feature processing for wrong predictions
 			continue
 
 		# part of speech
@@ -160,13 +158,11 @@ if __name__ == "__main__":
 				] = contribution_sum
 
 			for feature, contribution in features_of_one_class_tuple:
-				occurence_cnt = 0
 				feature_pos_list = []
 				for word in text_annotated:
 					if (
 						word.text == feature
 					):  # iterate over text, for multiple occurences take the last part of speech
-						occurence_cnt += 1
 						feature_pos_list.append(word.pos_)
 
 			pos_per_class[label_idx] += feature_pos_list
@@ -186,15 +182,9 @@ if __name__ == "__main__":
 		else:
 			out_soup.body.append(exp_soup.body)
 
+	## add accuracy
 	accuracy = correct_predictions_cnt / len(sample_indices) * 100
 	meta_df["Accuracy"] = accuracy
-	# mean variance of feature positions (to indiciate where context matters), search through anecdote necessary
-	columns_features_df = ["features", "contributions"]
-
-	columns_main_df = ["class", "top features"]
-	main_df = pd.DataFrame(columns=columns_main_df)
-	main_df["class"] = main_df["class"].astype(str)
-	main_df["top features"] = main_df["top features"].astype(object)
 
 	class_soup_list = []
 	mean_probabilities = None
@@ -211,12 +201,12 @@ if __name__ == "__main__":
 		plt.savefig(label + ".png")
 
 		##determine highest contributions
-		# exp_df = exp_df.reindex(exp_df.contributions.abs().sort_values(ascending=False).index)
 		exp_df = exp_df.iloc[
 			exp_df.contributions.abs().sort_values(ascending=False).index
 		].reset_index(drop=True)
 		topcontributions_df = exp_df.iloc[0:19]  # highest contributions as df
 
+		##determine class probabilities per predicted class
 		if not all_exps[
 			label_idx
 		]:  # needed if there is a class that has not been predicted
@@ -232,6 +222,7 @@ if __name__ == "__main__":
 		else:
 			mean_probabilities = np.concatenate([mean_probabilities, new_probabilities])
 
+		##statistics of top features per class
 		feature_counter = Counter(exp_df[column_feature])
 		features_df = pd.DataFrame()
 		for feature, cnt in feature_counter.most_common(5):
@@ -241,17 +232,21 @@ if __name__ == "__main__":
 			feature_series[column_feature] = feature
 			features_df = features_df.append(feature_series, ignore_index=True)
 
-		pos_counter = Counter(pos_per_class[label_idx])
-		pos_df = pd.DataFrame(
-			pos_counter.most_common(5), columns=[label + " part of speech", "count"]
-		)
-
+		## switch columns of the feature statistics
 		cols = features_df.columns.tolist()
 		new_cols = cols.copy()
 		new_cols[0] = cols[3]
 		new_cols[3] = cols[0]
 		features_df = features_df[new_cols]
 
+		## part of speech counting
+		pos_counter = Counter(pos_per_class[label_idx])
+		pos_df = pd.DataFrame(
+			pos_counter.most_common(5), columns=[label + " part of speech", "count"]
+		)
+
+
+		## process html per class
 		img_soup = out_soup.new_tag("img", src=label + ".png", alt="hist")
 		class_soup_list.append(BeautifulSoup(features_df.to_html(), "html.parser"))
 		class_soup_list.append(
