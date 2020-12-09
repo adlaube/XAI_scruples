@@ -1,6 +1,6 @@
 /data/
 /models/
-
+/scruples/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
