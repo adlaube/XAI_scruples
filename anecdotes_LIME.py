@@ -22,21 +22,13 @@ def explain_anecdote_lime(index: int,param_dict: dict):
                                                 num_features=param_dict['number_of_features'],
                                                 num_samples=num_of_pertubations,
                                                 top_labels=5) 
-
-        #end = time.time()
-        
-        #exp.save_to_file(str('exp/anecdotes/' + str(index) + '_LIME_' + str(num_of_pertubations) + '_' + str(anecdote_word_count) + '.html'))
-        #filehandler = open("exp.obj","wb")
-        #pickle.dump(exp,filehandler)
-        #filehandler.close()
-        #print('execution time': %f',end-start)
         return exp
 
 def explain_anecdotes_lime_sp():
         explainer = LimeTextExplainer(class_names=anecdotes_labels)
         #Problem: 5000 perturbations per sample, API muss umgangen werden um das umzustellen
         start = time.time()
-        sp_obj = submodular_pick.SubmodularPick(explainer, anecdotes_dataset, anecdotes_predict_lime, sample_size=1, num_features=5,num_exps_desired=10)
+        sp_obj = submodular_pick.SubmodularPick(explainer, anecdotes_data, anecdotes_predict_lime, sample_size=1, num_features=5,num_exps_desired=10)
         end = time.time()
         for idx,exp_item in enumerate(sp_obj.explanations):
                 exp_item.save_to_file("exp/anecdotes/ANEC_" + str(idx) + ".html")
