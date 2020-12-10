@@ -15,6 +15,7 @@ https://github.com/allenai/scruples
 ## Run scruples
 
 - clone XAI_scruples 
+- create venv from requirements.txt
 - clone and install scruples in venv from requirements.txt:             https://github.com/allenai/scruples#setup
 - download scruples model & config:                                     https://github.com/allenai/scruples/blob/master/docs/demos.md#norms
 - move model (.json & .bin) to ./model/anecdotes or ./models/dilemmas
@@ -27,6 +28,7 @@ https://github.com/allenai/scruples
 ## Run scruples in Docker
 
 - clone XAI_scruples
+- create venv from requirements.txt
 - clone scruples:       https://github.com/allenai/scruples
 - build and run docker container from Dockerfile
 
