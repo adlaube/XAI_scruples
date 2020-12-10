@@ -14,13 +14,26 @@ import subprocess
 import pickle
 
 import en_core_web_sm
-
 ## spacy for part of speech
 nlp = en_core_web_sm.load()
 
+
+### CONFIGURE
+
+param_dict = {
+	"max_number_of_pertubations": 100,
+	"adaptive_pertubations": True,
+	"number_of_features": 5,
+	"number_of_samples": 120
+}
+
+
 FILTER_INCORRECT_PREDICTIONS = True  # will still be stored and plotted, just not considered for the class statistics
-LOAD_FROM_PICKLE = True
+LOAD_FROM_PICKLE = False
 experiment_from_pickle = pickle.load(open("exp/anecdotes/random120/out.pickle", "rb"))
+
+### CONFIGURE END
+
 
 def get_explanation(idx: int, param_dict: dict):
 	if LOAD_FROM_PICKLE:
@@ -56,13 +69,6 @@ def plot_dataset_info(anecdotes_df: pd.DataFrame):
 
 
 if __name__ == "__main__":
-
-	param_dict = {
-		"max_number_of_pertubations": 4000,
-		"adaptive_pertubations": True,
-		"number_of_features": 5,
-		"number_of_samples": 120
-	}
 
 	sample_indices = np.random.randint(0, 2500, param_dict['number_of_samples'], np.uint32)
 	sample_indices = np.unique(sample_indices)
