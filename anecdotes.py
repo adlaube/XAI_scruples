@@ -29,7 +29,7 @@ param_dict = {
 
 
 FILTER_INCORRECT_PREDICTIONS = True  # will still be stored and plotted, just not considered for the class statistics
-LOAD_FROM_PICKLE = False
+LOAD_FROM_PICKLE = True
 experiment_from_pickle = pickle.load(open("exp/anecdotes/random120/out.pickle", "rb"))
 
 ### CONFIGURE END
@@ -104,9 +104,15 @@ if __name__ == "__main__":
 	all_exps_dict = {}
 	features_per_class = []
 	pos_per_class = []
+	children_per_class = []
+	head_per_class = []
+	sentence_per_class = []
 	for label in anecdotes_labels:
 		features_per_class.append([])
 		pos_per_class.append([])
+		children_per_class.append([])
+		head_per_class.append([])
+		sentence_per_class.append([])
 		all_exps.append([])
 	out_soup = None
 	# counter for accuracy
@@ -138,7 +144,7 @@ if __name__ == "__main__":
 			continue
 
 		# part of speech
-		text_annotated = nlp(anecdotes_df.loc[idx]["text"])
+		text_annotated = nlp(anecdotes_df.loc[idx]["title"] + ' ' + anecdotes_df.loc[idx]["text"])
 
 		# Process features and contributions per class
 		for label_idx in range(len(anecdotes_labels)):
@@ -166,16 +172,61 @@ if __name__ == "__main__":
 					"LOW_VALUE"
 				] = contribution_sum
 
+			# feature_iterator = iter(features_of_one_class_tuple)
+
+			# feature_idx = 0
+			# while feature_idx < len(features_of_one_class_tuple):
+			# 	feature = features_of_one_class_tuple[feature_idx][0]
+			# 	feature_pos_list = []
+			# 	feature_child_list = []
+			# 	for word in text_annotated:
+			# 		if (
+			# 			word.text == feature
+			# 		):  # iterate over text, for multiple occurences take the last part of speech
+			# 			feature_pos_list.append(word.pos_)
+			# 			features_of_one_class_tuple[feature_idx][0] += ':' + ','.join([child.text for child in word.children])
+						
+			# 			continue
+			# 	feature_idx+=1
+				
+
+			feature_pos_list = []
+			feature_child_list = []
+			feature_head_list = []
+			feature_sentence_list = []
 			for feature, contribution in features_of_one_class_tuple:
-				feature_pos_list = []
+				processed = False
+				children_to_append = ''
+				head_to_append = ''
+				sentence_to_append = ''				
 				for word in text_annotated:
+
 					if (
 						word.text == feature
 					):  # iterate over text, for multiple occurences take the last part of speech
-						feature_pos_list.append(word.pos_)
+						if processed == False:
+							feature_pos_list.append(word.pos_)
+							children_to_append = ','.join([child.text for child in word.children])
+							head_to_append = word.head.text
+							sentence_to_append = word.sent.text
+							processed = True
+						else:
+							sentence_to_append = 'A! ' + sentence_to_append #mark ambigious
+							break #break if ambigious feature
+
+				feature_child_list.append(children_to_append)
+				feature_head_list.append(head_to_append)
+				feature_sentence_list.append(sentence_to_append)
+
+			#for word in text_annotated:
+				#if word.head
 
 			pos_per_class[label_idx] += feature_pos_list
+			children_per_class[label_idx] += feature_child_list
+			head_per_class[label_idx] += feature_head_list
+			sentence_per_class[label_idx] += feature_sentence_list
 			features_per_class[label_idx] += features_of_one_class_tuple
+			
 
 		# HTML processing
 		exp_html = exp.as_html()
@@ -203,7 +254,10 @@ if __name__ == "__main__":
 		exp_df = pd.DataFrame(
 			features_per_class[label_idx], columns=[column_feature, "contributions"]
 		)
-
+		exp_df['sentence'] = sentence_per_class[label_idx]
+		exp_df['head'] = head_per_class[label_idx]
+		exp_df['children'] = children_per_class[label_idx]
+		
 		plt.clf()
 		exp_df.boxplot(column=["contributions"])
 		plt.title(label + " box plot")

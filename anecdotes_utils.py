@@ -30,7 +30,7 @@ with open(anecdotes_exp_dir + 'test.scruples-corpus.jsonl', 'r') as datafile:
 def get_merged_instance(instance_idx,truncate=False):
         keys = ['title', 'text']
         instance = [{x:anecdotes_data[instance_idx][x] for x in keys}]
-        merged_instance = instance[0]['title'] + instance[0]['text']
+        merged_instance = instance[0]['title'] + ' ' + instance[0]['text']
 
         PARAM_MAX_WORD_LENGTH = 50
         split_instance = merged_instance.split(" ")
