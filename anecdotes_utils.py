@@ -3,15 +3,6 @@ import json
 import requests
 import os
 
-""" from scruples.demos.norms import utils
-
-dataset = utils.PredictionDataset(
-        features=[
-                [instance['title'], instance['text']]
-                for instance in instances
-        ],
-        transform=featurize) """
-
 anecdotes_labels = ["AUTHOR", "OTHER", "EVERYBODY", "NOBODY", "INFO"]
 
 
@@ -47,6 +38,8 @@ def get_merged_instance(instance_idx,truncate=False):
 
         return merged_instance
 
+
+# interface LIME to scruples
 def anecdotes_predict_lime(texts):
 
         instances=[]
@@ -71,7 +64,7 @@ def anecdotes_predict_lime(texts):
                         ]
         return np.reshape(np.asarray(means),(-1,5))
 
-
+# interface anchors to scruples
 def anecdotes_predict_anchor(texts):
 
         instances=[]

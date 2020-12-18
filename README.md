@@ -7,6 +7,16 @@ https://github.com/allenai/scruples
 - explain anecdotes with [LIME](https://github.com/marcotcr/lime)
 - report generation with statistics on explanation features
 
+## What is where? 
+
+| File | features |
+| --- | --- |
+| anecdotes.py | generates LIME explanations for a random anecdotes subset and creates pickled explanations as well as html report + plots |
+| anecdotes_utils.py | interface functions that call the scruples REST API, reads anecdotes data from /data/ directory |
+| anecdotes_shap.py | explanations with SHAPley values, not functional currently |
+| anecdotes_LIME.py | explanations with LIME, functional |
+| anecdotes_anchors.py | explanations with anchors, functional but slow |
+
 
 ## Findings
 

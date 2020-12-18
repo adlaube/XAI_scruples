@@ -17,7 +17,6 @@ import en_core_web_sm
 ## spacy for part of speech
 nlp = en_core_web_sm.load()
 
-
 ### CONFIGURE
 
 param_dict = {
@@ -26,7 +25,6 @@ param_dict = {
 	"number_of_features": 5,
 	"number_of_samples": 120
 }
-
 
 FILTER_INCORRECT_PREDICTIONS = True  # will still be stored and plotted, just not considered for the class statistics
 LOAD_FROM_PICKLE = True
